@@ -1,5 +1,5 @@
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     activesupport (3.2.16)
       i18n (~> 0.6, >= 0.6.4)
@@ -72,6 +72,7 @@ GEM
       ffi (>= 0.5.0)
     rb-kqueue (0.2.0)
       ffi (>= 0.5.0)
+    redcarpet (3.0.0)
     sass (3.2.14)
     sprockets (2.10.1)
       hike (~> 1.2)
@@ -95,4 +96,5 @@ PLATFORMS
 DEPENDENCIES
   middleman (~> 3.2.2)
   middleman-livereload (~> 3.1.0)
+  redcarpet
   wdm (~> 0.1.0)
