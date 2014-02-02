@@ -1,0 +1,138 @@
+---
+title: 詳解Git
+---
+
+# <%= current_page.data.title %>
+
+
+## Git における4つの場所
+
+![gitの5つの場所](/images/git-4-stage.png)
+
+### ワーキングツリー
+
+普通にファイルを開いたり編集したりする作業場所。 svn だとワーキングコピー
+
+### インデックス
+
+コミットの候補を作るところ。マージもここで行われる。
+
+### ローカルリポジトリ
+
+git に関する全てのファイルが(blob tree commit tag)がSHA1で管理されている場所。.git ディレクトリの中にある。
+
+### リモートリポジトリ
+
+ローカルリポジトリとまったく同じ性質のもの。
+
+<hr>
+
+
+## 変数
+
+### HEAD
+
+現在のブランチの一番先頭のコミットを指すポインタ
+
+### HEAD^
+
+HEAD の一つ前のコミットを指すポインタ。 HEAD^^ だと２つ前 HEAD~5 だと5つ前
+
+### master
+
+デフォルトのブランチ
+
+### origin
+
+リモートリポジトリのデフォルト名
+
+<hr>
+
+## コミット、チェックアウト、ブランチ、マージ
+
+### コミット
+
+git commit を行うとコミットがひとつできます
+
+![コミット](/images/commits.png)
+
+commit とは現在の index の状態を gzip で 圧縮して内容、コミットした人の名前、メールアドレス、時間などを元に SHA1 を計算してその番号を与える作業
+
+
+### ブランチ
+
+git branch をするとコミットグラフに分岐ができます
+
+![ブランチ](/images/branch.png)
+
+ブランチ名はそのままそのブランチの HEAD のエイリアスでもあります。
+
+### チェックアウト
+
+4つの場所 の図を参照。
+
+git はリポジトリの中身を commit でつけた SHA1 で管理しています。
+
+SHA1 かそのエイリアスであるところのブランチ名、もしくは HEAD などを指定すると、
+その時の状態をワーキングツリーに展開します。
+
+ブランチ名ではなくファイル名を指定したら HEAD (直前のコミット) のファイル、もしくはディレクトリを展開します。
+
+
+### マージ
+
+![マージ](/images/merge.png)
+
+分岐したコミットを再び一つにまとめます。
+
+Git は 3way merge(共通の祖先に対する merge を行い、まったく同じ変更は無視される)を行うので共通の祖先となるコミットが無い場合は merge を行えません。
+
+<hr>
+
+## あえて冗長に使う
+
+### git clone
+
+```
+$ git clone git@github.com:oke-ya/git_practice.git
+```
+
+↓
+
+```
+$ mkdir git_practice
+$ cd git_practice
+$ git init
+$ git remote add origin git@github.com:oke-ya/git_practice.git
+$ git fetch origin
+$ git checkout -b master origin/master
+```
+
+### git pull
+
+```
+// master ブランチにいたとする
+$ git pull
+```
+
+↓
+
+```
+$ git fetch origin
+$ git merge origin/master
+```
+
+### git push
+
+```
+// masterブランチにいたとする
+$ git push
+```
+
+↓
+
+```
+// 後ろのほうの master を変えると別ブランチに対して push できる
+$ git push origin master:master
+```
+

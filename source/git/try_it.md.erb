@@ -1,0 +1,141 @@
+---
+title: とにかく git を使ってみよう
+---
+
+# <%= current_page.data.title %>
+
+## [チートシート](http://developerforcejp.s3.amazonaws.com/developer/cheatsheets/JP_SF_GIT_2Pg_HR_V10.pdf)
+
+## 初期設定
+
+```
+// コミットに載る名前とメールアドレス
+$ git config --global user.name "Atsushi YOSHIDA"
+$ git config --global user.email "yalab@oke-ya.com"
+// diff とか log とかに色をつける
+$ git config --global color.ui true
+```
+
+## git 管理を始める
+
+```
+$ mkdir git_practice
+$ cd git_practice
+$ git init
+```
+
+## ファイルを作ってバージョン管理する
+
+```
+$ echo "test" >> test.txt
+$ git add test.txt
+$ git commit -m "First commit"
+```
+
+## ファイルに変更を加えてコミットする
+
+```
+$ echo "test2" >> test.txt
+$ git diff
+$ git status
+$ git add test.txt
+$ git diff
+$ git diff --cached
+$ git status
+$ git commit -m "First change"
+```
+
+## 変更履歴を見てみる
+
+```
+$ git log
+$ git diff HEAD^..HEAD (zsh の場合'HEAD^'のようにクォートする)
+$ git show
+```
+
+## いろいろな形でログを見る
+
+```
+$ git log --name-status
+$ git log --short-stat
+$ git log -p
+$ git blame test.txt
+```
+
+## ファイルに変更を加えて、それを取り消す
+
+```
+$ echo "foobar" >> test.txt
+$ git checkout test.txt
+$ git status
+$ cat test.txt
+$ echo "hogehoge" >> test.txt
+$ git add test.txt
+$ git checkout test.txt
+$ git reset HEAD test.txt
+$ git checkout test.txt
+```
+
+## ブランチを作って操作してみる
+
+```
+$ git checkout -b test_branch
+$ git branch
+$ git checkout master
+$ git checkout test_branch
+$ echo "change_on_test_branch" >> test.txt
+$ git add test.txt
+$ git status
+$ git commit -m "Change on test_branch"
+$ git diff master..test_branch
+$ git checkout master
+$ git status
+$ cat test.txt
+$ echo "test3" >> test.txt
+$ git add test.txt
+$ git diff --cached
+$ git status
+$ git commit -m "add test3"
+$ git merge test_branch
+$ git status
+$ git diff
+$ vi test.txt # 手作業でマージ
+// <<<<<<< HEAD
+// =======
+// >>>>>>> test_branch
+// の3行を消す
+
+
+$ git diff
+$ git add test.txt
+$ git commit
+$ git log
+$ git branch
+$ git branch -d test_branch
+```
+
+## リモートブランチを使う
+
+```
+$ git clone git@github.com:yalab/git_practice.git
+$ cd git_practice
+$ git remote -v
+$ git branch -r
+$ git remote add oke-ya git@github.com:oke-ya/git_practice.git
+$ git fetch oke-ya
+$ git branch -r
+$ git checkout -b oke-ya oke-ya/master
+$ git branch -vv
+$ git checkout master
+$ git merge oke-ya
+$ git push
+```
+
+## その他便利コマンド
+
+```
+$ git reset
+$ git rebase
+$ git bisect
+$ git grep
+```

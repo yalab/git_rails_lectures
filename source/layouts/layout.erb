@@ -21,9 +21,35 @@
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li><a href="/git">Git</a></li>
-            <li><a href="/rails">Rails</a></li>
-            <li><a href="/tdd">TDD</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Git <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="/git/try_it.html">とにかく使ってみよう</a></li>
+                <li><a href="/git/description.html">詳解 Git</a></li>
+                <li><a href="/git/github.html">github を使ったワークフロー</a></li>
+              </ul>
+            </li>
+
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Rails <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="/rails/intro.html">イントロ</a></li>
+                <li><a href="/rails/ruby.html">Railsで使いそうなRubyの知識</a></li>
+                <li><a href="/rails/migration.html">migration</a></li>
+                <li><a href="/rails/rest-routing.html">REST と routing</a></li>
+                <li><a href="/rails/activerecord.html">ActiveRecord</a></li>
+                <li><a href="/rails/response-jbuilder.html">レスポンスコード と jbuilder</a></li>
+                <li><a href="/rails/callback.html">Callback</a></li>
+                <li><a href="/rails/gem.html">Gemによる拡張</a></li>
+              </ul>
+            </li>
+
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">TDD<b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="/tdd/first.html">はじめの一歩</a></li>
+              </ul>
+            </li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
