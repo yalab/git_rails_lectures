@@ -1,0 +1,103 @@
+---
+title: Railsで使いそうなRubyの知識
+---
+
+# <%= current_page.data.title %>
+
+- [Rubyリファレンス・マニュアル](http://docs.ruby-lang.org/ja/2.1.0/doc/index.html)
+
+## リファレンス・マニュアルの表記
+
+```
+Array#each  : Array クラスの each というインスタンスメソッド
+File.open   : File クラスの open というクラスメソッド
+1 + 1 #=> 2 : 1 + 1 を評価すると 2 になる
+```
+リファレンス・マニュアル -> [Rubyで使われる記号の意味](http://docs.ruby-lang.org/ja/2.1.0/doc/symref.html)
+
+## 全てはオブジェクト
+
+```
+$ irb
+irb(main):001:0> 1.+(1)
+=> 2
+irb(main):002:0> 1.class
+=> Fixnum
+```
+
+リファレンス・マニュアル -> 組み込みライブラリ -> [self + other](http://docs.ruby-lang.org/ja/2.1.0/method/Fixnum/i/=2b.html)
+
+## 代入してない変数みたいなものは引数なしのメソッド呼び出し
+
+```ruby
+clas Number
+  def one
+    1
+  end
+  
+  def two
+    2
+  end
+end
+
+class N < Number
+  def sum
+    # self.one + self.two の self を省略している
+    one + two
+  end
+end
+
+p N.new.sum #=> 3
+
+```
+
+## {} とか do end はブロック(無名メソッドのようなもの)
+
+```
+[1, 2, 3].each do |n|
+  p n
+end
+
+[1, 2, 3].each{|n|
+  p n
+}
+# これらは Array#each にブロックを渡している
+```
+
+リファレンス・マニュアル -> [制御構造](http://docs.ruby-lang.org/ja/2.1.0/doc/spec=2fcontrol.html)
+
+リファレンス・マニュアル -> 組み込みライブラリ -> Array -> [Array#each](http://docs.ruby-lang.org/ja/2.1.0/method/Array/i/each.html)
+
+## 定義していないメソッドを呼び出している場合は super class か include している module で定義されている
+
+```
+[1, 2, 3].find{|n| n.odd? } #=> 1
+# この find メソッドは Enumerable module が提供している
+```
+リファレンス・マニュアル -> 組み込みライブラリ -> [Array](http://docs.ruby-lang.org/ja/2.1.0/class/Array.html)
+
+リファレンス・マニュアル -> 組み込みライブラリ -> [Enumerable](http://docs.ruby-lang.org/ja/2.1.0/class/Enumerable.html)
+
+## クラスやインスタンスの情報は直接そのクラスに問い合わせられる
+
+```ruby
+irb(main):001:0> 1.class
+=> Fixnum
+irb(main):002:0> 1.methods
+=> [:to_s, :inspect, :-@, :+, :-, :*, :/, :div, :%, :modulo, :divmod, :fdiv, :**, :abs, :magnitude, :==, :===, :<=>, :>, :>=, :<, :<=, :~, :&, :|, :^, :[], :<<, :>>, :to_f, :size, :zero?, :odd?, :even?, :succ, :integer?, :upto, :downto, :times, :next, :pred, :chr, :ord, :to_i, :to_int, :floor, :ceil, :truncate, :round, :gcd, :lcm, :gcdlcm, :numerator, :denominator, :to_r, :rationalize, :singleton_method_added, :coerce, :i, :+@, :eql?, :quo, :remainder, :real?, :nonzero?, :step, :to_c, :real, :imaginary, :imag, :abs2, :arg, :angle, :phase, :rectangular, :rect, :polar, :conjugate, :conj, :between?, :nil?, :=~, :!~, :hash, :class, :singleton_class, :clone, :dup, :taint, :tainted?, :untaint, :untrust, :untrusted?, :trust, :freeze, :frozen?, :methods, :singleton_methods, :protected_methods, :private_methods, :public_methods, :instance_variables, :instance_variable_get, :instance_variable_set, :instance_variable_defined?, :remove_instance_variable, :instance_of?, :kind_of?, :is_a?, :tap, :send, :public_send, :respond_to?, :extend, :display, :method, :public_method, :define_singleton_method, :object_id, :to_enum, :enum_for, :equal?, :!, :!=, :instance_eval, :instance_exec, :__send__, :__id__]
+irb(main):003:0> 1.class.ancestors
+=> [Fixnum, Integer, Numeric, Comparable, Object, Kernel, BasicObject]
+irb(main):004:0> 1.respond_to?(:size)
+=> true
+```
+
+リファレンス・マニュアル -> 組み込みライブラリ -> [Object](http://docs.ruby-lang.org/ja/2.1.0/class/Object.html)
+
+## private とか protected の意味あいが java や PHP とは違う
+
+
+> public に設定されたメソッドは制限なしに呼び出せます。
+> private に設定されたメソッドは関数形式でしか呼び出せません。
+> protected に設定されたメソッドは、そのメソッドを持つオブジェクトが selfであるコンテキスト(メソッド定義式やinstance_eval)でのみ呼び出せ ます。
+
+リファレンス・マニュアル -> クラス/メソッドの定義 -> [呼び出し制限](http://docs.ruby-lang.org/ja/2.1.0/doc/spec=2fdef.html#limit)

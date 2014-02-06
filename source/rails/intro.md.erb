@@ -1,0 +1,83 @@
+---
+title: イントロ
+---
+
+# <%= current_page.data.title %>
+
+## ドキュメント
+
+- [Rubyリファレンス・マニュアル](http://docs.ruby-lang.org/ja/2.1.0/doc/index.html)
+- [Rails Guide](http://guides.rubyonrails.org)
+
+## Rails がやってくれること
+
+- table の作成、変更
+- URL と コードの関連付け
+- SQL の発行、データの取得
+- html, json を生成
+- テスト支援
+
+## まずは rails プロジェクトを作って scaffold してみる
+
+```
+$ rails new railsapi -d postgresql
+$ cd railsapi
+$ git init
+$ git add .
+$ git commit -m "First commit"
+$ vi config/database.yml
+```
+```
+#各自の環境に合わせてパスワードやユーザー名、socket の場所を設定
+
+
+development: &pg 
+  adapter: postgres
+  encoding: utf8
+  database: railsapi_development
+  pool: 5
+  username: <%%= ENV["PG_USERNAME"] %> # ENV は環境変数
+  password: <%%= ENV["PG_PASSWORD"] %>
+
+test:
+  <<: *pg
+  database: railsapi_test
+
+production:
+  <<: *pg
+  database: railsapi_production
+```
+
+```
+$ rake db:create # ユーザーに権限が無い場合は手動で作る
+$ rails g scaffold User name:string age:integer
+$ rake db:migrate
+$ git add .
+$ git coommit -m "rails g scaffold User name:string age:integer"
+$ rails s
+//Ctrl + c で rails s は終了できます
+```
+
+[http://localhost:3000/users](http://localhost:3000/users) にアクセスしていじってみる
+
+[http://localhost:3000/users.json](http://localhost:3000/users.json) にアクセスしてみる
+
+
+## test/models や test/controllers ディレクトリ以下に test コードができているので動かしてみる
+
+```
+$ ruby -I test test/models/user\_test.rb
+$ ruby -I test test/controllers/users\_controller_test.rb
+$ rake
+$ rake test:models
+$ rake test:controllers
+```
+
+# Rails 俯瞰
+
+- M (ActiveRecord)
+- V (ActionView)
+- C (ActionController)
+- Router (ActionDispatch)
+
+![俯瞰図](/images/rails_overview.png)

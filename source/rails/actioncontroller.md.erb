@@ -1,0 +1,174 @@
+---
+title: ActionController と jBuilder
+---
+
+# <%= current_page.data.title %>
+
+## ドキュメント
+
+[Rails Guilde action controller overview](http://guides.rubyonrails.org/action_controller_overview.html)
+
+## Controller の役目
+
+- ユーザーとの入出力を処理する
+- DBにデータを問い合わせ view に渡してレスポンスを作成しブラウザに返す
+- Webアプリでは HTTP (たまに SMTP とか websocket)
+- クエリ、パラメーター、cookie(session) を扱う
+
+# config/application.rb に API 用の設定 をする
+
+```ruby
+  config.generators do |g|
+    g.stylesheets false
+    g.javascripts false
+    g.template_engine false
+  end
+```
+
+scss, coffee script, html テンプレートなどの余計なファイルを作らないようになる
+
+RailsGuilde -> Creating and Customizing Rails Generators & Templates -> [Customizing Your Workflow](http://guides.rubyonrails.org/generators.html#customizing-your-workflow)
+
+## controller を触ってみる
+
+### versions#current を作ってみる
+
+```
+$ rails g controller versions current
+$ git add .
+$ git commit -m "rails g controller versions current"
+$ rails s
+```
+
+http://localhost:3000/version.json にアクセスしてみましょう
+
+「Template is missing」となります。
+json に対する template は jbuider というものを使うのですが、 controller の generator ではこれを作ってくれません。jbuilder については後ほどやります。
+
+### app/controllers/versions_controler.rb を開き以下のようにする
+
+```
+class VersionsController < ApplicationController
+  def current
+    render text: "Hello rails API world"
+  end
+end
+```
+
+再び rails サーバーを起動し
+
+http://localhost:3000/version.json にアクセスしてみましょう
+
+<% if false %>
+URL と controller#action が対応付けされており ruby のコードがかけるようになりました。
+<% end %>
+
+### action 内で p してみてサーバーの出力を見る
+
+```ruby
+class VersionsController < ApplicationController
+  def current
+    p "####\nfoobar"
+    render text: "Hello rails API world"
+  end
+end
+```
+
+http://localhost:3000/version.json にアクセスしてみましょう
+
+### パラメータを見てみる
+
+```
+class VersionsController < ApplicationController
+  def current
+    puts "###"
+    p params
+    render text: "#{params[:q]}"
+  end
+end
+```
+
+http://localhost:3000/version.json?q=123&a=111 や http://localhost:3000/version.json?q=hoge&a=foo にアクセスしてみましょう。またサーバーの出力を見てみましょう。
+
+RailsGuide -> Action Controller Overview -> [Parameters](http://guides.rubyonrails.org/action_controller_overview.html#parameters)
+
+
+## jBuilder (json view)
+
+```ruby
+class VersionsController < ApplicationController
+  def current
+    @version = 1
+  end
+end
+```
+
+```sh
+$ mkdir app/views/versions/
+$ echo "json.version @version" > app/views/versions/current.json.jbuilder
+```
+
+http://localhost:3000/version.json にアクセス
+
+
+jBuilder とは JSON を作成するための view。
+
+[github rails/jbuilder](https://github.com/rails/jbuilder)
+
+
+## Callback(filter)
+
+全てのリクエストに対して例えば認証処理を施したりあるいはログを取ったりといった共通処理をさせたい場合に ActionController には before\_action や after_action といった callback を設定できます。
+
+```ruby
+class ApplicationController < ActionController::Base
+  before_action :token_check
+ 
+  private
+ 
+  def token_check
+    unless params["token"] == ENV["TOKEN"]
+      flash[:error] = "トークンが一致しません"
+      redirect_to root_url
+    end
+  end
+end
+  
+class UsersController < ApplicationController
+  skip_before_action :token_check, only: [:index]
+end
+```
+
+RailsGuide -> Action Controller Overview -> [Filters](http://guides.rubyonrails.org/action_controller_overview.html#filters)
+
+## レスポンスコード
+
+ActionController から任意の HTTP レスポンスコードを返すには render や redirect_to といったメソッドに status というオプションでレスポンスコードを渡してあげます。
+
+```ruby
+def show
+  unless @user
+    render text: '{}', status: 404
+  end
+end
+```
+
+## session, flash
+
+action を跨いで保持しておかなければいけないデータを格納する場所として session と flash という２つの場所があります。session は指定期間まで(デフォルトではブラウザを閉じるまで)、 flash はひとつの action をまたぐ間だけ有効なデータです。
+
+REST な API はステートレスとなるのであまり使う事はないかもしれません。
+
+RailsGuide -> Action Controller Overview -> [Session](http://guides.rubyonrails.org/action_controller_overview.html#session)
+
+## StrongParameter
+
+ActiveRecord のところで説明します。
+
+RailsGuide -> Action Controller Overview -> [Strong Parameters](http://guides.rubyonrails.org/action_controller_overview.html#strong-parameters)
+
+# ここまででできるようになったこと
+
+- DB を使わない Web API の作成
+- jbuidler で JSON の構築
+- status の返し方、callback や session などの ActionController の機能があることがわかった

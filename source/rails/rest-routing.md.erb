@@ -1,0 +1,180 @@
+---
+title: Rest と routes.rb の設定
+---
+
+# <%= current_page.data.title %>
+
+## ドキュメント
+
+[Rails Routing from the Outside In](http://guides.rubyonrails.org/routing.html)
+
+## RESTとは？
+
+- PATH を名詞にしてリソースを表し HTTP メソッドを動詞、をクエリでクライアントの要求表す考え方
+- HTTP レスポンスコード で要求に対する可否を応答し、レスポンスBODYで中身を表す
+
+|HTTP メソッド| 意味            |
+|-----------|----------------|
+| POST      | 新規作成(CREATE) |
+| GET       | 取得(READ)      |
+| PUT,PATCH | 更新(UPDATE)    |
+| DELETE    | 削除(DELETE)    |
+
+### 例
+
+| URL                          | HTTPメソッド |  意味                  |
+|------------------------------|--------|----------------------------|
+| /users                       | GET    | ユーザー全員の情報を取得する     |
+| /users?page=2                | GET    | ユーザー情報に2ページめを取得する |
+| /users                       | POST   | ユーザーを新規作成する          |
+| /users/1                     | GET    | ID: 1 の人の情報を取得         |
+| /users/2                     | DELETE | ID: 2 の人を削除             |
+| /sections/developer1/employs | GET    | 第一開発部の社員情報を取得      |
+| /articles/2014/02/15         | GET    | 2014年2月15日の記事を取得     |
+| /articles?date=20140215      | GET    | 2014年2月15日の記事を取得     |
+
+### REST ではない例
+| URL                       | HTTPメソッド | 理由                                      |
+|---------------------------|------------|-------------------------------------------|
+| /users/create             | POST       | PATHに動詞が含まれている                      |
+| /users?action=create      | GET        | クエリに動詞が含まれる、HTTP メソッドと矛盾している | 
+| /users/search?name_like=a | POST       | クエリに動詞が含まれる、POSTなのに何も作らない     |
+
+## HTTP レスポンスコード
+
+| code | 意味          |
+|------|--------------|
+| 200  | 成功          |
+| 201  | 作成          |
+| 301  | 恒久的に移動した |
+| 400  | 不正なリクエスト |
+| 404  | 未検出         |
+
+[RFC2616日本語訳](http://www.studyinghttp.net/cgi-bin/rfc.cgi?2616)
+
+## 注意点
+
+- POST 以外は冪等でないといけない
+- リソースは複数形であるほうがよい
+
+# config/routes.rb
+
+Rails で URL と controller と action を関連付ける設定ファイル。
+
+controller としての役目を負ったクラス(ApplicationController を継承しているクラス)を「controller」、 controller 内に定義された public なメソッドを「action」 と呼びます。
+
+```ruby
+Railsapi::Application.routes.draw do
+  resources :users # 最初にやった rails g scaffold User name:string age:integer で追加された
+  
+...
+```
+
+```
+$ rake routes
+   Prefix Verb   URI Pattern               Controller#Action
+    users GET    /users(.:format)          users#index
+          POST   /users(.:format)          users#create
+ new_user GET    /users/new(.:format)      users#new
+edit_user GET    /users/:id/edit(.:format) users#edit
+     user GET    /users/:id(.:format)      users#show
+          PATCH  /users/:id(.:format)      users#update
+          PUT    /users/:id(.:format)      users#update
+          DELETE /users/:id(.:format)      users#destroy
+```
+
+### アプリの最新バージョンを返す URL を作ってみる
+
+```ruby
+Railsapi::Application.routes.draw do
+  resources :users
+  get :version, to: "versions#current"
+  
+...
+```
+
+```
+$ rake routes                            [~/tmp/railsapi]
+   Prefix Verb   URI Pattern               Controller#Action
+    users GET    /users(.:format)          users#index
+          POST   /users(.:format)          users#create
+ new_user GET    /users/new(.:format)      users#new
+edit_user GET    /users/:id/edit(.:format) users#edit
+     user GET    /users/:id(.:format)      users#show
+          PATCH  /users/:id(.:format)      users#update
+          PUT    /users/:id(.:format)      users#update
+          DELETE /users/:id(.:format)      users#destroy
+  version GET    /version(.:format)        versions#current
+  
+```
+HTTP メソッドに従った get や post などの URL が定義できます。
+
+# 注文履歴に関するリソースを扱う URL を作ってみる
+
+```
+Railsapi::Application.routes.draw do
+  resources :users do
+    resources :orders
+  end
+  get :version, to: "versions#current"
+  
+...
+```
+
+```
+$ rake routes
+         Prefix Verb   URI Pattern                               Controller#Action
+    user_orders GET    /users/:user_id/orders(.:format)          orders#index
+                POST   /users/:user_id/orders(.:format)          orders#create
+ new_user_order GET    /users/:user_id/orders/new(.:format)      orders#new
+edit_user_order GET    /users/:user_id/orders/:id/edit(.:format) orders#edit
+     user_order GET    /users/:user_id/orders/:id(.:format)      orders#show
+                PATCH  /users/:user_id/orders/:id(.:format)      orders#update
+                PUT    /users/:user_id/orders/:id(.:format)      orders#update
+                DELETE /users/:user_id/orders/:id(.:format)      orders#destroy
+          users GET    /users(.:format)                          users#index
+                POST   /users(.:format)                          users#create
+       new_user GET    /users/new(.:format)                      users#new
+      edit_user GET    /users/:id/edit(.:format)                 users#edit
+           user GET    /users/:id(.:format)                      users#show
+                PATCH  /users/:id(.:format)                      users#update
+                PUT    /users/:id(.:format)                      users#update
+                DELETE /users/:id(.:format)                      users#destroy
+        version GET    /version(.:format)                        versions#current
+```
+
+ネストさせたリソースを定義できます。
+
+## 定義したリソースにアクセスしてみる
+
+```
+$ rails s
+```
+
+http://localhost:3000/version 
+
+「uninitialized constant VersionsController」
+
+と出ますがまだ Controller を作っていないので当たり前です。
+実際には次の章で作ります。
+
+```
+$ rails s
+```
+
+http://localhost:3000/aaa にアクセス
+
+# ここまでのまとめ
+
+- REST というアーキテクチャがあり、PATH、 HTTPメソッド、クエリをそれぞれ 名詞、動詞、クライアントの要求表す考え方です
+- config/routes.rb の設定で URL と controller, action を関連付けます。
+- routes.rb では ネストしたリソースやネームスペース付きの URL を作成できます。
+- routes.rb で設定した内容は $ rake routes で確認できます。
+- エラー画面でも routes が表示されます。
+
+# ここまでで一旦コミットしておきましょう
+
+```
+$ git add .
+$ git commit -m "rest-routing"
+```

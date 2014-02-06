@@ -1,0 +1,257 @@
+---
+title: テスト
+---
+
+# <%= current_page.data.title %>
+
+今まで rails c やブラウザで確認していたことを ruby のコード再現してその結果が正しいかをテストでき、そのためのフレームワークが rails には組み込まれています。
+
+# もっとも基本的なテストコード
+
+```ruby
+assert_equal 2, 1 + 1
+```
+
+assertion の種類
+
+RailsGuide -> [vailable Assertions](http://guides.rubyonrails.org/testing.html#available-assertions)
+
+# model のテスト
+
+先ほどの ActiveRecord のコールバックの内容をテストしてみます
+
+## 初期データ
+
+```
+#test/fixtures/users.yml
+one:
+  name: YOSHIDA
+  age: 31
+  
+two:
+  name: ATSUSHI
+  age: 8
+```
+
+```
+#vi test/fixtures/products.yml
+one:
+  name: たこ焼き
+  price: 300
+  
+two:
+  name: いか焼き
+  price: 150
+```
+
+```
+#test/fixtures/order_items.yml
+one:
+  product: one
+  quantity: 2
+  order: one
+  
+two:
+  product: two
+  quantity: 5
+  order: two
+```
+`リレーションに関している箇所には リレーション名: キー という形で表現できる`
+
+```
+#test/fixtures/order.yml
+one:
+  user: one
+  summary: <%%= 300 * 2 %>
+  
+two:
+  user: two
+  summary: <%%= 150 * 5 %>
+```
+
+`erb が使えます`
+
+
+## OrderItem のコールバックのテスト
+
+```
+#test/models/order_item_test.rb
+require 'test_helper'
+  
+class OrderItemTest < ActiveSupport::TestCase
+  setup do
+    @order_item = order_items(:one)
+  end
+  
+  test "OrderItem callback calcuration summary" do
+    quantity = 5
+    @order_item.update(quantity: quantity)
+    assert_equal @order_item.product.price * quantity, @order_item.order.summary
+  end
+end
+```
+
+## テストを実行する
+
+```sh
+$ rake db:migrate RAILS_ENV=test
+もしくは
+$ rake db:test:clone
+
+$ ruby -I test test/models/order_item_test.rb
+Run options: --seed 13961
+
+# Running tests:
+
+.
+
+Finished tests in 0.048787s, 20.4973 tests/s, 20.4973 assertions/s.
+```
+
+`after_save をコメントアウトして走らせたりしてみましょう`
+
+## controller のテスト
+
+```ruby
+#test/controllers/versions_controller_test.rb
+require 'test_helper'
+  
+class VersionsControllerTest < ActionController::TestCase
+  test "should get current" do
+    get :current, format: :json
+    assert_response :success
+    res = JSON.parse(response.body)
+    assert_equal 1, res['version']
+  end
+end
+```
+
+- `format: :json をつける`
+- `response.body で実際に描画されているものが取得できる`
+
+## test を実行する
+
+```
+$ ruby -I test test/controllers/versions_controller_test.rb
+Run options: --seed 41049
+
+# Running tests:
+
+.
+
+Finished tests in 0.037820s, 26.4410 tests/s, 52.8821 assertions/s.
+
+1 tests, 2 assertions, 0 failures, 0 errors, 0 skips
+```
+
+## テストを全て実行する
+
+```
+$ rake
+$ rake test:models
+$ rake test:controllers
+```
+
+## テスト駆動開発
+
+先にテストを書いてテストに通るように実装する手法
+
+### 1. 仕様を考える
+
+- 注文詳細を返す API を作る
+- /orders/1 を GET すると次の JSON が HTTP レスポンスコード 200 で返ってくる
+
+```
+{orders: {price: 400, order_items:[{name: ""}...]}}
+```
+
+### 2. 必要なファイルを generate する
+
+```
+$ rails generate controller orders
+$ mkdir -p app/controllers/orders
+
+```
+
+### 3. test を書く
+
+
+```ruby
+#test/contrlllers/orders_controller_test.rb
+require 'test_helper'
+  
+class OrdersControllerTest < ActionController::TestCase
+  setup do
+    @order = orders(:one)
+  end
+  
+  test "orders detail get API" do
+    get :show, id: @order.to_param, format: :json
+    assert_response :success
+    json = JSON.parse(response.body)
+    assert_equal 400, json['orders']['price']
+    assert_equal 1, json['orders']['order_items'].length
+  end
+end
+```
+
+### 4. test を通すように実装する
+
+```sh
+$ ruby -I test test/controllers/orders_controller_test.rb
+Run options: --seed 8518
+  
+\# Running tests:
+  
+E
+  
+Finished tests in 0.062156s, 16.0886 tests/s, 0.0000 assertions/s.
+  
+  1) Error:
+OrdersControllerTest#test_orders_detail_get_API:
+ActionController::UrlGenerationError: No route matches {:id=>"980190962", :format=>:json, :controller=>"orders", :action=>"show"}
+    test/controllers/orders_controller_test.rb:9:in `block in <class:OrdersControllerTest>'
+  
+1 tests, 0 assertions, 0 failures, 1 errors, 0 skips
+```
+
+Routing の定義が無いので加える
+
+```
+#\ config/routes.rb
+...
+  resources :orders, only: [:show]
+...
+```
+
+```ruby
+$ ruby -I test test/controllers/orders_controller_test.rb
+Run options: --seed 48797
+  
+#\ Running tests:
+  
+E
+  
+Finished tests in 0.056139s, 17.8129 tests/s, 0.0000 assertions/s.
+  
+  1) Error:
+OrdersControllerTest#test_orders_detail_get_API:
+AbstractController::ActionNotFound: The action 'show' could not be found for OrdersController
+    test/controllers/orders_controller_test.rb:9:in `block in <class:OrdersControllerTest>'
+  
+1 tests, 0 assertions, 0 failures, 1 errors, 0 skips
+```
+
+action が定義されてないので定義する
+
+```ruby
+#\ app/controllers/orders_controller.rb
+class OrdersController < ApplicationController
+  def show
+  end
+end
+```
+
+### 続きはやってみてください
+
+`TDD はバグが無い事は保証しない。以前の実装が壊れていない事を保証するので変更に強くなる。`

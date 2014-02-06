@@ -1,0 +1,40 @@
+---
+title: gem による拡張、production環境
+---
+
+# <%= current_page.data.title %>
+
+## gem の探し方
+
++ [Ruby Tool Box](https://www.ruby-toolbox.com)
+
+## 便利gem
+
+- pry-rails (rails c の拡張)
+- simplecov (test のカバレッジ計測)
+- whenever  (cron 登録の DSL)
+- backup    (バックアップ)
+- devise    (rails のユーザー認証処理)
+- omniauth  (OAUTH クライアント)
+- cancan    (権限設定)
+- carrierwave (ファイルのアップロード)
+- capistrano (デプロイツール)
+
+# サーバー
+
+- [Apache + passenger](https://www.phusionpassenger.com)
+- [Nginx](http://nginx.org) + [unicorn](https://github.com/defunkt/unicorn)
+
+Apache + passenger のほうが構築は楽
+
+# CI
+
+- [Jenkins](http://jenkins-ci.org)
+- [travis CI](https://travis-ci.org)
+- [Circle CI](https://circleci.com)
+
+# 環境構築
+
+- [Puppet](http://puppetlabs.com)
+- [Chef](http://docs.opscode.com)
+
