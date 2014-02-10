@@ -66,6 +66,9 @@ $ rails s
 ## test/models や test/controllers ディレクトリ以下に test コードができているので動かしてみる
 
 ```
+$ RAILS_ENV=test rake db:create db:migrate
+もしくは
+$ rake db:test:clone
 $ ruby -I test test/models/user\_test.rb
 $ ruby -I test test/controllers/users\_controller_test.rb
 $ rake
