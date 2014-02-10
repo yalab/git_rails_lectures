@@ -184,8 +184,6 @@ $ rake test:controllers
 
 ```
 $ rails generate controller orders
-$ mkdir -p app/controllers/orders
-
 ```
 
 ### 3. test を書く
@@ -204,7 +202,7 @@ class OrdersControllerTest < ActionController::TestCase
     get :show, id: @order.to_param, format: :json
     assert_response :success
     json = JSON.parse(response.body)
-    assert_equal 400, json['orders']['price']
+    assert_equal 300, json['orders']['price']
     assert_equal 1, json['orders']['order_items'].length
   end
 end
