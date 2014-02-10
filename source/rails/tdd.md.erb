@@ -110,6 +110,21 @@ Finished tests in 0.048787s, 20.4973 tests/s, 20.4973 assertions/s.
 
 `after_save をコメントアウトして走らせたりしてみましょう`
 
+## リファクタリング
+
+```
+class OrderItem < ActiveRecord::Base
+  ...
+  def calculate_summary
+    order       = Order.find(order_id)
+    order_items = order.order_items # リファクタリング
+    summary     = order_items.map{|i| i.quantity * i.product.price}.inject(:+)
+    order.update(summary: summary)
+  end
+end
+```
+
+
 ## controller のテスト
 
 ```ruby
