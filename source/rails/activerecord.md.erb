@@ -413,9 +413,24 @@ RailsGuide -> [Active Record Callbacks](http://edgeguides.rubyonrails.org/active
 
 RailsGuide -> Action Controller Overview -> [Strong Parameters](http://guides.rubyonrails.org/action_controller_overview.html#strong-parameters)
 
-<% if false %>
+## 時刻
+
+ActiveRecord は 時刻を必ず UTC で持ちます。そのうえで config/application.rb で 
+
+```
+module Railsapi
+  class Application < Rails::Application
+  ...
+    config.time_zone = 'Osaka'
+```
+
+のように指定したタイムゾーンに変換されます。
+
+
 # ここまでのまとめ
 
 - ActiveRecord はテーブル定義の作成、変更、 SQLの発行、バリデーション、コールバックなどの機能があります
-<% end %>
-
+- has_many, belongs_to, has_many through といったリレーションが扱えます
+- scope 便利です
+- StrongParameter はわりとハマります
+- 時刻には気をつけてください
