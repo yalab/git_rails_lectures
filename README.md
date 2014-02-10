@@ -4,6 +4,7 @@
 $ gem install middleman
 $ git clone https://github.com/yalab/git_rails_lectures.git
 $ cd git_rails_lectures
+$ bundle install
 $ middleman server
 // http://localhost:4567/ をブラウザで開く
 ```
