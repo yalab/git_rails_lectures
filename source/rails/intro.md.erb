@@ -73,6 +73,23 @@ $ rake test:models
 $ rake test:controllers
 ```
 
+# Bundler
+
+Gem のバージョンをプロジェクト毎に固定するツール
+
+```
+$ cat Gemfile
+$ bundle install
+$ bundle show
+```
+
+bundle install を実行した時に Gemfile.lock があるとそれに従ったバージョンで gem がインストールされ、 
+
+Gemfile.lock が無かった場合バージョンの競合を解決し、 Gemfile.lock が出来上がる。
+
+何か一つだけバージョンを上げる場合 Gemfile 無いでバージョンを上げて(固定していない場合は不要)bundle update rails のようにする
+
+
 # Rails 俯瞰
 
 - M (ActiveRecord)
